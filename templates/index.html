@@ -138,42 +138,56 @@
         }
         async function updatePreview() {
             const codes = document.getElementById('codes').value.split('\n').filter(code => code.trim() !== '');
+            const previewContainer = document.getElementById('preview-container');
+            
             if (codes.length === 0) {
-                document.getElementById('preview-container').innerHTML = '<h2>Preview</h2>';
+                previewContainer.innerHTML = '<h2>Preview</h2>';
                 return;
             }
-            const response = await fetch('/generate_preview', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ codes: codes }),
-            });
-            const result = await response.json();
-            if (result.success) {
-                const previewContainer = document.getElementById('preview-container');
-                previewContainer.innerHTML = '<h2>Preview</h2>';
-                result.barcodes.forEach(barcode => {
-                    const div = document.createElement('div');
-                    div.className = 'barcode-preview';
         
-                    if (barcode.barcode_base64_code && barcode.barcode_base64_pin) {
-                        // Add the barcode-with-pin class to shrink the height of these images
-                        div.classList.add('barcode-with-pin');
-                        div.innerHTML = `
-                            <img src="data:image/png;base64,${barcode.barcode_base64_code}" />
-                            <img src="data:image/png;base64,${barcode.barcode_base64_pin}" />
-                        `;
-                    } else {
-                        div.innerHTML = `<img src="data:image/png;base64,${barcode.barcode_base64}" />`;
-                    }
+            // Clear the preview container before loading new content
+            previewContainer.innerHTML = '<h2>Preview</h2>';
         
-                    previewContainer.appendChild(div);
+            try {
+                const response = await fetch('/generate_preview', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ codes: codes }),
                 });
-            } else {
-                alert('Error generating preview.');
+                const result = await response.json();
+        
+                if (result.success) {
+                    result.barcodes.forEach(barcode => {
+                        const div = document.createElement('div');
+                        div.className = 'barcode-preview';
+        
+                        if (barcode.barcode_base64_code && barcode.barcode_base64_pin) {
+                            div.classList.add('barcode-with-pin');
+                            div.innerHTML = `
+                                <img src="data:image/png;base64,${barcode.barcode_base64_code}" />
+                                <img src="data:image/png;base64,${barcode.barcode_base64_pin}" />
+                            `;
+                        } else {
+                            div.innerHTML = `<img src="data:image/png;base64,${barcode.barcode_base64}" />`;
+                        }
+        
+                        previewContainer.appendChild(div);
+                    });
+                } else {
+                    throw new Error('Error generating barcodes. Please ensure the input is valid.');
+                }
+            } catch (error) {
+                // Display error message in the preview container
+                previewContainer.innerHTML = `
+                    <h2>Preview</h2>
+                    <div style="color: red; text-align: center; margin-top: 20px;">
+                        ${error.message}
+                    </div>
+                `;
             }
-        }         
+        }        
     </script>
 </body>
 </html>
