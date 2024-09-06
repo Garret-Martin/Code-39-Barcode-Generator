@@ -1,3 +1,4 @@
+import re
 from flask import Flask, render_template, request, jsonify, session
 from flask_session import Session
 import barcode
@@ -28,10 +29,12 @@ def generate_barcode_image(code):
 def generate_barcode_pages(codes):
     barcode_pages = []
     for code in codes:
-        if "PIN:" in code:
-            main_code, pin = code.split(" PIN:")
-            barcode_img_code = generate_barcode_image(main_code.strip())
-            barcode_img_pin = generate_barcode_image(pin.strip())
+        match = re.match(r"(.+?)\s*PIN:\s*(.+)", code)
+        if match:
+            main_code = match.group(1).strip()
+            pin = match.group(2).strip()
+            barcode_img_code = generate_barcode_image(main_code)
+            barcode_img_pin = generate_barcode_image(pin)
             
             barcode_base64_code = base64.b64encode(barcode_img_code.getvalue()).decode('utf-8')
             barcode_base64_pin = base64.b64encode(barcode_img_pin.getvalue()).decode('utf-8')
