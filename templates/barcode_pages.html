@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Pages</title>
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    .barcode-page {
+        page-break-before: always;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    .barcode {
+        width: 100%;
+        margin-bottom: 20px;
+        text-align: center;
+        border: 1px solid black;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+    .barcode img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+    .barcode .value {
+        margin-top: 5px;
+    }
+    @media print {
+        body {
+            margin: 20px;
+        }
+        .barcode-page {
+            page-break-before: auto;
+            page-break-after: auto;
+        }
+        .barcode {
+            width: 40%;
+            margin-bottom: 0;
+            text-align: center;
+            border: 1px solid white;
+            padding: 0px;
+            box-sizing: border-box;
+            page-break-inside: avoid;
+        }
+        .barcode img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+    }
+</style>
+<body>
+  <div class="barcode-page">
+    {% for barcode_data in barcode_pages %}
+    <div class="barcode">
+        {% if barcode_data['barcode_base64_code'] and barcode_data['barcode_base64_pin'] %}
+        <div style="display: flex; justify-content: space-between;">
+            <div>
+                <img src="data:image/png;base64,{{ barcode_data['barcode_base64_code'] }}">
+            </div>
+            <div>
+                <img src="data:image/png;base64,{{ barcode_data['barcode_base64_pin'] }}">
+            </div>
+        </div>
+        {% else %}
+        <img src="data:image/png;base64,{{ barcode_data['barcode_base64'] }}">
+        {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+    <script>
+        window.onload = function() { window.print(); }
+    </script>
+</body>
+</html>

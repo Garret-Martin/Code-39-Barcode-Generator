@@ -1,0 +1,6 @@
+Flask>=2.0
+Werkzeug>=2.0,<2.1
+python-barcode==0.15.1
+pillow>=10.3.0
+Flask-Session>=0.3.2
+

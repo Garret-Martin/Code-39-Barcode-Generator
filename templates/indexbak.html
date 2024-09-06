@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url("{{ url_for('static', filename='background.jpg') }}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        .main-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        .container {
+            flex: 1;
+            margin: 20px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-contents: center;
+        }
+        .container textarea {
+            flex: 1;
+            width: auto;
+            height: auto;
+            margin-bottom: 10px;
+            resize: none;
+        }
+        .container button {
+            height: 10%;
+            border-radius: 5px;
+            width: 100%;
+            padding: 10px 20px;
+            font-size: 25px;
+            background-color: rgb(255, 230, 204);
+        }
+        .preview-container {
+            width: 65%;
+            margin: 20px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .barcode-preview {
+            margin-bottom: 20px;
+        }
+        .barcode img {
+            width = max;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .cover {
+            object-fit: fill;
+            width: 100%;
+            max-height: 350px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="container">
+            <h1>Code-39 Barcode Generator</h1>
+            <textarea id="codes" placeholder="Enter codes here, one per line" oninput="updatePreview()"></textarea>
+            <button onclick="generateBarcodes()">Print Barcodes</button>
+        </div>
+        <div class="preview-container" id="preview-container">
+            <h2>Preview</h2>
+        </div>
+    </div>
+    <script>
+        async function generateBarcodes() {
+            const codes = document.getElementById('codes').value.split('\n').filter(code => code.trim() !== '');
+            const response = await fetch('/generate_barcodes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ codes: codes }),
+            });
+            const result = await response.json();
+            if (result.success) {
+                window.location.href = '/barcode_pages';
+            } else {
+                alert('Error generating barcodes.');
+            }
+        }
+
+        async function updatePreview() {
+            const codes = document.getElementById('codes').value.split('\n').filter(code => code.trim() !== '');
+            if (codes.length === 0) {
+                document.getElementById('preview-container').innerHTML = '<h2>Preview</h2>';
+                return;
+            }
+            const response = await fetch('/generate_preview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ codes: codes }),
+            });
+            const result = await response.json();
+            if (result.success) {
+                const previewContainer = document.getElementById('preview-container');
+                previewContainer.innerHTML = '<h2>Preview</h2>';
+                result.barcodes.forEach(barcode => {
+                    const div = document.createElement('div');
+                    div.className = 'barcode-preview';
+                    div.innerHTML = `<img src="data:image/png;base64,${barcode.barcode_base64}" class="cover" />`;
+                    previewContainer.appendChild(div);
+                });
+            } else {
+                alert('Input only uppercase letters (A through Z), numeric digits (0 through 9) or (-, ., $, /, +, %, and space)');
+            }
+        }
+    </script>
+</body>
+</html>
