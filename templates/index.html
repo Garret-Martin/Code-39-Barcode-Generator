@@ -79,6 +79,14 @@
             display: block;
             margin: 10px auto;
         }
+        .barcode-with-pin img {
+            width: 48%; /* Make the images smaller by using flex */
+            height: 40%; /* Ensure the height adjusts proportionally */
+        }
+        .barcode-with-pin {
+            display: flex;
+            justify-content: space-between;
+        }        
         @media (min-width: 768px) {
             .main-container {
                 flex-direction: row;
@@ -128,7 +136,6 @@
                 alert('Error generating barcodes.');
             }
         }
-
         async function updatePreview() {
             const codes = document.getElementById('codes').value.split('\n').filter(code => code.trim() !== '');
             if (codes.length === 0) {
@@ -149,13 +156,24 @@
                 result.barcodes.forEach(barcode => {
                     const div = document.createElement('div');
                     div.className = 'barcode-preview';
-                    div.innerHTML = `<img src="data:image/png;base64,${barcode.barcode_base64}" class="cover" />`;
+        
+                    if (barcode.barcode_base64_code && barcode.barcode_base64_pin) {
+                        // Add the barcode-with-pin class to shrink the height of these images
+                        div.classList.add('barcode-with-pin');
+                        div.innerHTML = `
+                            <img src="data:image/png;base64,${barcode.barcode_base64_code}" />
+                            <img src="data:image/png;base64,${barcode.barcode_base64_pin}" />
+                        `;
+                    } else {
+                        div.innerHTML = `<img src="data:image/png;base64,${barcode.barcode_base64}" />`;
+                    }
+        
                     previewContainer.appendChild(div);
                 });
             } else {
-                //alert('Input only uppercase letters (A through Z), numeric digits (0 through 9) or (-, ., $, /, +, %, and space)');
+                alert('Error generating preview.');
             }
-        }
+        }         
     </script>
 </body>
 </html>
