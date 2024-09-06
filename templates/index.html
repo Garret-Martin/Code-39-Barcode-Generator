@@ -176,7 +176,7 @@
                         previewContainer.appendChild(div);
                     });
                 } else {
-                    throw new Error('Error generating barcodes. Please ensure the input is valid.');
+                    throw new Error('Error generating barcodes. Please ensure the input is valid. Input only uppercase letters (A through Z), numeric digits (0 through 9) or (-, ., $, /, +, %, and space)');
                 }
             } catch (error) {
                 // Display error message in the preview container
